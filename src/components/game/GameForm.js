@@ -1,11 +1,11 @@
 import React, { useContext, useState, useEffect } from "react"
 import { GameContext } from "./GameProvider.js"
-import { useHistory } from 'react-router-dom'
+import { useHistory, useParams } from 'react-router-dom'
 
 
 export const GameForm = () => {
     const history = useHistory()
-    const { createGame, getGameTypes, gameTypes } = useContext(GameContext)
+    const { createGame, getGameTypes, gameTypes, updateGame, getGameById } = useContext(GameContext)
 
     const [currentGame, setCurrentGame] = useState({
         difficulty: 1,
@@ -15,14 +15,24 @@ export const GameForm = () => {
         gameTypeId: 0
     })
 
+    const { gameId } = useParams();
+
     useEffect(() => {
         getGameTypes()
+            .then(getGameById).then(() => {
+                if (gameId) {
+                    getGameById(gameId).then(game => {
+                        setCurrentGame(game)
+                    })
+                }
+            })
     }, [])
 
     const handleControlledInputChange = (event) => {
         const newGame = { ...currentGame }
         newGame[event.target.id] = event.target.value
         setCurrentGame(newGame)
+        console.log(event)
     }
 
     return (
@@ -77,26 +87,46 @@ export const GameForm = () => {
                     </select>
                 </div>
             </fieldset>
+            {
+                gameId
+                    ? <button
+                        onClick={evt => {
+                            // Prevent form from being submitted
+                            evt.preventDefault()
 
+                            const game = {
+                                id: gameId,
+                                name: currentGame.name,
+                                difficulty: parseInt(currentGame.difficulty),
+                                minPlayers: parseInt(currentGame.minPlayers),
+                                maxPlayers: parseInt(currentGame.maxPlayers),
+                                gameTypeId: parseInt(currentGame.gameTypeId)
+                            }
 
-            <button type="submit"
-                onClick={evt => {
-                    // Prevent form from being submitted
-                    evt.preventDefault()
+                            // Send POST request to your API
+                            updateGame(game)
+                                .then(() => history.push("/games"))
+                        }}
+                        className="btn btn-primary">Edit</button>
+                    : <button type="submit"
+                        onClick={evt => {
+                            // Prevent form from being submitted
+                            evt.preventDefault()
 
-                    const game = {
-                        name: currentGame.name,
-                        difficulty: parseInt(currentGame.difficulty),
-                        minPlayers: parseInt(currentGame.minPlayers),
-                        maxPlayers: parseInt(currentGame.maxPlayers),
-                        gameTypeId: parseInt(currentGame.gameTypeId)
-                    }
+                            const game = {
+                                name: currentGame.name,
+                                difficulty: parseInt(currentGame.difficulty),
+                                minPlayers: parseInt(currentGame.minPlayers),
+                                maxPlayers: parseInt(currentGame.maxPlayers),
+                                gameTypeId: parseInt(currentGame.gameTypeId)
+                            }
 
-                    // Send POST request to your API
-                    createGame(game)
-                        .then(() => history.push("/"))
-                }}
-                className="btn btn-primary">Create</button>
+                            // Send POST request to your API
+                            createGame(game)
+                                .then(() => history.push("/"))
+                        }}
+                        className="btn btn-primary">Create</button>
+            }
         </form>
     )
 }
