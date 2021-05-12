@@ -32,7 +32,6 @@ export const GameForm = () => {
         const newGame = { ...currentGame }
         newGame[event.target.id] = event.target.value
         setCurrentGame(newGame)
-        console.log(event)
     }
 
     return (
@@ -93,9 +92,8 @@ export const GameForm = () => {
                         onClick={evt => {
                             // Prevent form from being submitted
                             evt.preventDefault()
-
                             const game = {
-                                id: gameId,
+                                id: parseInt(gameId),
                                 name: currentGame.name,
                                 difficulty: parseInt(currentGame.difficulty),
                                 minPlayers: parseInt(currentGame.minPlayers),
