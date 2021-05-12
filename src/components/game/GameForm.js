@@ -8,7 +8,7 @@ export const GameForm = () => {
     const { createGame, getGameTypes, gameTypes, updateGame, getGameById } = useContext(GameContext)
 
     const [currentGame, setCurrentGame] = useState({
-        difficulty: 1,
+        difficulty: "",
         minPlayers: 0,
         maxPlayers: 0,
         name: "",
@@ -19,10 +19,17 @@ export const GameForm = () => {
 
     useEffect(() => {
         getGameTypes()
-            .then(getGameById).then(() => {
+            .then(() => {
                 if (gameId) {
                     getGameById(gameId).then(game => {
-                        setCurrentGame(game)
+                        setCurrentGame({
+                            difficulty: game.difficulty,
+                            minPlayers: game.min_players,
+                            maxPlayers: game.max_players,
+                            name: game.name,
+                            gameTypeId: game.game_type.id,
+                            id: gameId
+                        })
                     })
                 }
             })
@@ -30,9 +37,10 @@ export const GameForm = () => {
 
     const handleControlledInputChange = (event) => {
         const newGame = { ...currentGame }
-        newGame[event.target.id] = event.target.value
+        newGame[event.target.name] = event.target.value
         setCurrentGame(newGame)
     }
+
 
     return (
         <form className="gameForm">
@@ -40,25 +48,38 @@ export const GameForm = () => {
             <fieldset>
                 <div className="form-group">
                     <label htmlFor="name">Title: </label>
-                    <input type="text" id="name" required autoFocus className="form-control"
+                    <input type="text" name="name" required autoFocus className="form-control"
                         value={currentGame.name}
                         onChange={handleControlledInputChange}
                     />
                 </div>
             </fieldset>
+
             <fieldset>
-                <div className="form-group">
-                    <label htmlFor="difficulty">Difficulty (1 is easy and 5 is difficult): </label>
-                    <input type="text" id="difficulty" required autoFocus className="form-control"
-                        value={currentGame.difficulty}
+                <label htmlFor="difficulty">
+                    <input type="radio" name="difficulty" className="form-control"
+                        value="Easy"
+                        checked={currentGame.difficulty === "Easy"}
                         onChange={handleControlledInputChange}
-                    />
-                </div>
+                    />Easy</label>
+                <label htmlFor="difficulty">
+                    <input type="radio" name="difficulty" className="form-control"
+                        value="Moderate"
+                        checked={currentGame.difficulty === "Moderate"}
+                        onChange={handleControlledInputChange}
+                    />Moderate</label>
+                <label htmlFor="difficulty">
+                    <input type="radio" name="difficulty" className="form-control"
+                        value="Difficult"
+                        checked={currentGame.difficulty === "Difficult"}
+                        onChange={handleControlledInputChange}
+                    />Difficult</label>
             </fieldset>
+
             <fieldset>
                 <div className="form-group">
                     <label htmlFor="minPlayers">Minimum Players: </label>
-                    <input type="text" id="minPlayers" required autoFocus className="form-control"
+                    <input type="text" name="minPlayers" required autoFocus className="form-control"
                         value={currentGame.minPlayers}
                         onChange={handleControlledInputChange}
                     />
@@ -67,7 +88,7 @@ export const GameForm = () => {
             <fieldset>
                 <div className="form-group">
                     <label htmlFor="maxPlayers">Maximum Players: </label>
-                    <input type="text" id="maxPlayers" required autoFocus className="form-control"
+                    <input type="text" name="maxPlayers" required autoFocus className="form-control"
                         value={currentGame.maxPlayers}
                         onChange={handleControlledInputChange}
                     />
@@ -76,7 +97,7 @@ export const GameForm = () => {
             <fieldset>
                 <div className="form-group">
                     <label htmlFor="gameType">Type of Game: </label>
-                    <select value={currentGame.gameTypeId} id="gameTypeId" className="form-control" onChange={handleControlledInputChange}>
+                    <select value={currentGame.gameTypeId} name="gameTypeId" className="form-control" onChange={handleControlledInputChange}>
                         <option value="0">Select a category</option>
                         {gameTypes.map(gt => (
                             <option key={gt.id} value={gt.id}>
@@ -95,7 +116,7 @@ export const GameForm = () => {
                             const game = {
                                 id: parseInt(gameId),
                                 name: currentGame.name,
-                                difficulty: parseInt(currentGame.difficulty),
+                                difficulty: currentGame.difficulty,
                                 minPlayers: parseInt(currentGame.minPlayers),
                                 maxPlayers: parseInt(currentGame.maxPlayers),
                                 gameTypeId: parseInt(currentGame.gameTypeId)
@@ -125,6 +146,6 @@ export const GameForm = () => {
                         }}
                         className="btn btn-primary">Create</button>
             }
-        </form>
+        </form >
     )
 }
